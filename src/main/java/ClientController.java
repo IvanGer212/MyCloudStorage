@@ -34,9 +34,11 @@ public class ClientController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            Socket socket = new Socket("Localhost",8080);
+            Socket socket = new Socket("Localhost",8189);
             is = new DataInputStream(socket.getInputStream());
             os = new DataOutputStream(socket.getOutputStream());
+            File dir = new File("dir");
+            listFileClient.getItems().addAll(dir.list());
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
