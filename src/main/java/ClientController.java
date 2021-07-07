@@ -16,6 +16,7 @@ import java.util.ResourceBundle;
 public class ClientController implements Initializable {
     public ListView<String> listFileClient;
     public Label status;
+    public ListView listFileServer;
     private DataOutputStream os;
     private DataInputStream is;
 
@@ -39,6 +40,8 @@ public class ClientController implements Initializable {
             os = new DataOutputStream(socket.getOutputStream());
             File dir = new File("dir");
             listFileClient.getItems().addAll(dir.list());
+            File serverDir = new File("server_dir");
+            listFileServer.getItems().addAll(serverDir.list());
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
@@ -56,5 +59,17 @@ public class ClientController implements Initializable {
             e.printStackTrace();
         }
 
+    }
+
+    public void refreshServer(ActionEvent actionEvent) {
+        File serverDir = new File("server_dir");
+        listFileServer.getItems().clear();
+        listFileServer.getItems().addAll(serverDir.list());
+    }
+
+    public void refreshClient(ActionEvent actionEvent) {
+        File clientDir = new File("dir");
+        listFileClient.getItems().clear();
+        listFileClient.getItems().addAll(clientDir.list());
     }
 }

@@ -13,7 +13,7 @@
       </AnchorPane>
       <AnchorPane layoutX="580.0" layoutY="220.0" prefHeight="560.0" prefWidth="400.0" style="-fx-background-color: #fafafa;" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="21.0">
          <children>
-            <ListView prefHeight="560.0" prefWidth="400.0" />
+            <ListView fx:id="listFileServer" prefHeight="560.0" prefWidth="400.0" />
          </children>
       </AnchorPane>
       <Button layoutX="440.0" layoutY="400.0" mnemonicParsing="false" onAction="#send" prefHeight="50.0" prefWidth="120.0" text="&gt;&gt;&gt;" />
@@ -23,12 +23,12 @@
             <Font name="Tahoma" size="40.0" />
          </font>
       </Label>
-      <Button layoutX="347.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
+      <Button onAction="#refreshClient" layoutX="347.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
          <font>
             <Font name="Tahoma" size="15.0" />
          </font>
       </Button>
-      <Button layoutX="913.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
+      <Button onAction="#refreshServer" layoutX="913.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
          <font>
             <Font name="Tahoma" size="15.0" />
          </font>
