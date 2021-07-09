@@ -4,34 +4,44 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0" style="-fx-background-color: #386;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="800.0" prefWidth="1000.0" style="-fx-background-color: #386;" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ClientController">
    <children>
       <AnchorPane layoutX="20.0" layoutY="220.0" prefHeight="560.0" prefWidth="400.0" style="-fx-background-color: #fafafa;">
          <children>
-            <ListView prefHeight="560.0" prefWidth="400.0" />
+            <ListView fx:id="listFileClient" prefHeight="560.0" prefWidth="400.0" />
          </children>
       </AnchorPane>
       <AnchorPane layoutX="580.0" layoutY="220.0" prefHeight="560.0" prefWidth="400.0" style="-fx-background-color: #fafafa;" AnchorPane.bottomAnchor="20.0" AnchorPane.rightAnchor="21.0">
          <children>
-            <ListView prefHeight="560.0" prefWidth="400.0" />
+            <ListView fx:id="listFileServer" prefHeight="560.0" prefWidth="400.0" />
          </children>
       </AnchorPane>
-      <Button layoutX="440.0" layoutY="400.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="120.0" text="&gt;&gt;&gt;" />
+      <Button layoutX="440.0" layoutY="400.0" mnemonicParsing="false" onAction="#send" prefHeight="50.0" prefWidth="120.0" text="&gt;&gt;&gt;" />
       <Button layoutX="440.0" layoutY="500.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="120.0" text="&lt;&lt;&lt;" />
       <Label layoutX="339.0" layoutY="29.0" prefHeight="51.0" prefWidth="323.0" text="My Cloud Storage" textFill="#2a1468">
          <font>
             <Font name="Tahoma" size="40.0" />
          </font>
       </Label>
-      <Button layoutX="347.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
+      <Button onAction="#refreshClient" layoutX="347.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
          <font>
             <Font name="Tahoma" size="15.0" />
          </font>
       </Button>
-      <Button layoutX="913.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
+      <Button onAction="#refreshServer" layoutX="913.0" layoutY="169.0" mnemonicParsing="false" prefHeight="42.0" prefWidth="73.0" text="Refresh">
          <font>
             <Font name="Tahoma" size="15.0" />
          </font>
       </Button>
+      <Label layoutX="579.0" layoutY="169.0" prefHeight="42.0" prefWidth="315.0" style="-fx-background-color: #FAFAFA;" text="Label">
+         <font>
+            <Font size="15.0" />
+         </font>
+      </Label>
+      <Label fx:id="status" layoutX="20.0" layoutY="169.0" prefHeight="42.0" prefWidth="307.0" style="-fx-background-color: #fafafa;" text="Label">
+         <font>
+            <Font name="Arial" size="16.0" />
+         </font>
+      </Label>
    </children>
 </AnchorPane>
