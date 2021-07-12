@@ -31,11 +31,10 @@ public class Handler implements Runnable{
                 }
                 os.writeUTF("File: " + filename + " successfully received!");
                 os.flush();
-
-
             }
         } catch (Exception e){
             System.err.println("Exception while read");
         }
+
     }
 }

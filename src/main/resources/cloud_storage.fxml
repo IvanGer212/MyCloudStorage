@@ -16,8 +16,8 @@
             <ListView fx:id="listFileServer" prefHeight="560.0" prefWidth="400.0" />
          </children>
       </AnchorPane>
-      <Button layoutX="440.0" layoutY="400.0" mnemonicParsing="false" onAction="#send" prefHeight="50.0" prefWidth="120.0" text="&gt;&gt;&gt;" />
-      <Button layoutX="440.0" layoutY="500.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="120.0" text="&lt;&lt;&lt;" />
+      <Button layoutX="440.0" layoutY="400.0" mnemonicParsing="false" onAction="#uploadOnServer" prefHeight="50.0" prefWidth="120.0" text="&gt;&gt;&gt;" />
+      <Button onAction="#downloadFromServer" layoutX="440.0" layoutY="500.0" mnemonicParsing="false" prefHeight="50.0" prefWidth="120.0" text="&lt;&lt;&lt;" />
       <Label layoutX="339.0" layoutY="29.0" prefHeight="51.0" prefWidth="323.0" text="My Cloud Storage" textFill="#2a1468">
          <font>
             <Font name="Tahoma" size="40.0" />

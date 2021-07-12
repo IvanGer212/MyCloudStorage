@@ -16,12 +16,12 @@ import java.util.ResourceBundle;
 public class ClientController implements Initializable {
     public ListView<String> listFileClient;
     public Label status;
-    public ListView listFileServer;
+    public ListView<String> listFileServer;
     private DataOutputStream os;
     private DataInputStream is;
 
 
-    public void send(ActionEvent actionEvent) throws IOException {
+    public void uploadOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
         File file = new File("dir/"+filename);
         long filesize = file.length();
@@ -71,5 +71,8 @@ public class ClientController implements Initializable {
         File clientDir = new File("dir");
         listFileClient.getItems().clear();
         listFileClient.getItems().addAll(clientDir.list());
+    }
+
+    public void downloadFromServer(ActionEvent actionEvent){
     }
 }
