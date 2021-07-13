@@ -6,6 +6,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,7 +18,9 @@ public class ServerNIO {
     private Selector selector;
     private ByteBuffer buf;
 
+
     public ServerNIO() throws IOException {
+
         serverSocketChannel = ServerSocketChannel.open();
         selector = Selector.open();
         buf = ByteBuffer.allocate(256);
@@ -62,11 +67,19 @@ public class ServerNIO {
         }
         System.out.println("Received: " + builder);
         String msg = builder.toString();
-        if (msg.equals("ls\r\n")){
+        if (msg.equals("ls\r\n")) {
             String listOfServerFiles = Arrays.toString(new File("dir").list());
             ByteBuffer response = ByteBuffer.wrap(listOfServerFiles.getBytes(StandardCharsets.UTF_8));
             channel.write(response);
-        } else {
+        }
+        else if (msg.startsWith("cat")){
+                String filename = msg.replaceAll("cat ","");
+                byte[] bites = Files.readAllBytes(Paths.get("C:\\Users\\admin\\IdeaProjects\\Test_NIO\\dir\\1.txt")); //(dir,filename));
+                String msg1 = new String(bites,"utf8");
+                ByteBuffer response =  ByteBuffer.wrap(msg1.getBytes(StandardCharsets.UTF_8));
+                channel.write(response);
+            }
+        else {
             ByteBuffer response = ByteBuffer.wrap(msg.getBytes(StandardCharsets.UTF_8));
             channel.write(response);
         }
