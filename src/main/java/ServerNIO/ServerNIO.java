@@ -16,6 +16,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.nio.file.Files.createFile;
+
 public class ServerNIO {
     private ServerSocketChannel serverSocketChannel;
     private Selector selector;
@@ -78,8 +80,11 @@ public class ServerNIO {
         }
         else if (msg.startsWith("touch")){
             String filename = msg.replaceAll("touch ", "").trim();
-            Path newfile = Paths.get(root.toString(),filename);
-            Files.write(newfile, Collections.singletonList(null));
+            Path newFile = Files.createFile(Paths.get( root.toString(), filename));
+        }
+        else if (msg.startsWith("mkdir")){
+            String dirname = msg.replaceAll("mkdir","").trim();
+            Path newDir = Files.createDirectory(Paths.get(root.toString(), dirname));
         }
         else if (msg.startsWith("cat")){
                 String filename = msg.replaceAll("cat ","").trim();
