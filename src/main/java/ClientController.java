@@ -1,52 +1,52 @@
+import ServerNetty.*;
+import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
-import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 
 public class ClientController implements Initializable {
     public ListView<String> listFileClient;
     public Label status;
     public ListView<String> listFileServer;
-    private DataOutputStream os;
-    private DataInputStream is;
+    public TextField newFilename;
+    private ObjectEncoderOutputStream os;
+    private ObjectDecoderInputStream is;
 
 
     public void uploadOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
-        File file = new File("dir/"+filename);
-        long filesize = file.length();
-        os.writeUTF(filename);
-        os.writeLong(filesize);
-        Files.copy(file.toPath(),os);
-        status.setText("File: "+filename + " send on server.");
+        os.writeObject(new FileMessage(Paths.get("dir", filename)));
+        os.flush();
 
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            Socket socket = new Socket("Localhost",8189);
-            is = new DataInputStream(socket.getInputStream());
-            os = new DataOutputStream(socket.getOutputStream());
-            File dir = new File("dir");
+            Socket socket = new Socket("Localhost",8188);
+            os = new ObjectEncoderOutputStream(socket.getOutputStream());
+            is = new ObjectDecoderInputStream(socket.getInputStream());
+           File dir = new File("dir");
             listFileClient.getItems().addAll(dir.list());
             File serverDir = new File("server_dir");
             listFileServer.getItems().addAll(serverDir.list());
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
-                    String statusRead = is.readUTF();
-                    Platform.runLater(()->status.setText(statusRead));
+                    Message message = (Message) is.readObject();
+                    Platform.runLater(()->status.setText(message.toString()));
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -74,5 +74,26 @@ public class ClientController implements Initializable {
     }
 
     public void downloadFromServer(ActionEvent actionEvent){
+    }
+
+    public void deleteFileOnServer(ActionEvent actionEvent) throws IOException {
+        String filename = listFileServer.getSelectionModel().getSelectedItem();
+         os.writeObject(new FileDeleter(Paths.get("server_dir",filename)));
+         os.flush();
+    }
+
+    public void createNewFileOnServer(ActionEvent actionEvent) throws IOException {
+        String filename = newFilename.getText();
+        os.writeObject(new FileCreater(Paths.get("server_dir",filename)));
+        os.flush();
+    }
+
+    public void renameFileOnServer(ActionEvent actionEvent) throws IOException {
+        String filename = listFileServer.getSelectionModel().getSelectedItem();
+        String renameName = newFilename.getText();
+        Object obj = new RenameRequest(Paths.get("server_dir", filename),renameName);
+        os.writeObject(obj);
+        os.flush();
+
     }
 }
