@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ResourceBundle;
@@ -21,6 +22,7 @@ public class ClientController implements Initializable {
     public Label status;
     public ListView<String> listFileServer;
     public TextField newFilename;
+    public TextField newFilenameClient;
     private ObjectEncoderOutputStream os;
     private ObjectDecoderInputStream is;
 
@@ -95,5 +97,37 @@ public class ClientController implements Initializable {
         os.writeObject(obj);
         os.flush();
 
+    }
+
+    public void createNewFileOnClient(ActionEvent actionEvent) throws IOException {
+        String filename = newFilenameClient.getText();
+        os.writeObject(new FileCreater(Paths.get("dir",filename)));
+        os.flush();
+    }
+
+    public void renameFileOnClient(ActionEvent actionEvent) throws IOException {
+        String filename = listFileClient.getSelectionModel().getSelectedItem();
+        String renameName = newFilenameClient.getText();
+        Object obj = new RenameRequest(Paths.get("dir", filename),renameName);
+        os.writeObject(obj);
+        os.flush();
+    }
+
+    public void deleteFileOnClient(ActionEvent actionEvent) throws IOException {
+        String filename = listFileClient.getSelectionModel().getSelectedItem();
+        os.writeObject(new FileDeleter(Paths.get("dir",filename)));
+        os.flush();
+    }
+
+    public void createNewDirOnServer(ActionEvent actionEvent) throws IOException {
+        String dirname = newFilename.getText();
+        os.writeObject(new DirCreater(Paths.get("server_dir"),dirname));
+        os.flush();
+    }
+
+    public void createNewDirOnClient(ActionEvent actionEvent) throws IOException {
+        String dirname = newFilenameClient.getText();
+        os.writeObject(new DirCreater(Paths.get("dir"),dirname));
+        os.flush();
     }
 }

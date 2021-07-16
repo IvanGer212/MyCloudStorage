@@ -10,9 +10,11 @@ import java.nio.file.Path;
 public class FileDeleter extends AbstractCommand{
 
     private final String filename;
+    private final String dir;
 
     public FileDeleter(Path path) {
         filename = path.getFileName().toString();
+        dir = path.getParent().toString();
     }
 
     @Override

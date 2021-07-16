@@ -26,28 +26,35 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             break;
         case LIST_MESSAGE:
             break;
-        case LIST_REQuEST:
+        case LIST_REQUEST:
             break;
         case DELETE_REQUEST:
             FileDeleter deleter = (FileDeleter) command;
             String filename = deleter.getFilename();
-            Path file = Paths.get("server_dir",filename);
+            String dirDel = deleter.getDir();
+            Path file = Paths.get(dirDel,filename);
             Files.delete(file);
             break;
         case RENAME_REQUEST:
             {
                 RenameRequest renameRequest = (RenameRequest) command;
-                String newfilename = renameRequest.getNewFilename();
-                Path source = Paths.get("server_dir",renameRequest.getName());
-                Files.move(source,source.resolveSibling(newfilename)).toString();
+                String newFilename = renameRequest.getNewFilename();
+                String dirRename = renameRequest.getDir();
+                Path source = Paths.get(dirRename,renameRequest.getName());
+                Files.move(source,source.resolveSibling(newFilename)).toString();
             break;
             }
         case FILE_CREATE:
             FileCreater fileCreater = (FileCreater) command;
             String filename1 = fileCreater.getFilename();
-            Files.createFile(Paths.get("server_dir", filename1));
+            String dirCreate = fileCreater.getDirName();
+            Files.createFile(Paths.get(dirCreate, filename1));
             break;
         case DIR_CREATE:
+            DirCreater dirCreater = (DirCreater) command;
+            String dir1 = dirCreater.getDir();
+            String newDir = dirCreater.getNewDir();
+            Files.createDirectories(Paths.get(dir1,newDir));
             break;
     }
     }

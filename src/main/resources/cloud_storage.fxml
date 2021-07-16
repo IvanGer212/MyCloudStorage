@@ -47,9 +47,14 @@
          </font>
       </Label>
       <Button layoutX="579.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewFileOnServer" prefHeight="51.0" prefWidth="95.0" text="New Files" />
-      <Button layoutX="689.0" layoutY="98.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="95.0" text="New Folder" />
-      <Button layoutX="799.0" layoutY="98.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="95.0" text="Rename File" />
-      <Button layoutX="902.0" layoutY="98.0" mnemonicParsing="false" onAction="#deleteFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Delete File" />
-      <TextField fx:id="newFilename" layoutX="569.0" layoutY="134.0" prefHeight="25.0" prefWidth="110.0" />
+      <Button onAction="#createNewDirOnServer" layoutX="689.0" layoutY="73.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="95.0" text="New Folder" />
+      <Button layoutX="799.0" layoutY="73.0" mnemonicParsing="false" onAction="#renameFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Rename File" />
+      <Button layoutX="902.0" layoutY="73.0" mnemonicParsing="false" onAction="#deleteFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Delete File" />
+      <TextField fx:id="newFilename" layoutX="579.0" layoutY="137.0" prefHeight="25.0" prefWidth="110.0" />
+      <Button layoutX="20.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewFileOnClient" prefHeight="51.0" prefWidth="95.0" text="New Files" />
+      <Button onAction="#createNewDirOnClient" layoutX="126.0" layoutY="73.0" mnemonicParsing="false" prefHeight="51.0" prefWidth="95.0" text="New Folder" />
+      <Button layoutX="232.0" layoutY="73.0" mnemonicParsing="false" onAction="#renameFileOnClient" prefHeight="51.0" prefWidth="95.0" text="Rename File" />
+      <Button layoutX="336.0" layoutY="73.0" mnemonicParsing="false" onAction="#deleteFileOnClient" prefHeight="51.0" prefWidth="95.0" text="Delete File" />
+      <TextField fx:id="newFilenameClient" layoutX="20.0" layoutY="137.0" prefHeight="25.0" prefWidth="110.0" />
    </children>
 </AnchorPane>

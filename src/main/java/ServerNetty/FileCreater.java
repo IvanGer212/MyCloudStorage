@@ -13,10 +13,11 @@ import java.nio.file.Paths;
 public class FileCreater extends AbstractCommand {
 
     private final String filename;
+    private final String dirName;
 
     public FileCreater(Path path) throws IOException {
         filename = path.getFileName().toString();
-
+        dirName = path.getParent().toString();
     }
 
     @Override

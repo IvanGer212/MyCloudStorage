@@ -10,10 +10,13 @@ import java.nio.file.Path;
 public class RenameRequest extends AbstractCommand{
     private final String name;
     private final String newFilename;
+    private final String dir;
 
     public RenameRequest(Path path, String filename) throws IOException {
         name = path.getFileName().toString();
         newFilename = filename;
+        dir = path.getParent().toString();
+
     }
 
     @Override
