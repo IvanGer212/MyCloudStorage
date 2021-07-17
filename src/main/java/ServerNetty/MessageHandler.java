@@ -18,7 +18,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
     switch (command.getType()){
         case FILE_MESSAGE:
             FileMessage message = (FileMessage) command;
-            try (FileOutputStream fos = new FileOutputStream("server_dir/"+message.getName())){
+            try (FileOutputStream fos = new FileOutputStream(message.getServerDir()+"/"+message.getName())){
                 fos.write(message.getData());
             }
             break;

@@ -12,7 +12,7 @@ public class DirCreater extends AbstractCommand{
     private final String newDir;
 
     public DirCreater(Path path, String newDir) {
-        dir = path.getFileName().toString();
+        dir = path.toAbsolutePath().toString();
         this.newDir = newDir;
     }
 
