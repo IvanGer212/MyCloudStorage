@@ -78,7 +78,13 @@ public class ClientController implements Initializable {
         listFileClient.getItems().addAll(clientDir.list());
     }
 
-    public void downloadFromServer(ActionEvent actionEvent){
+    public void downloadFromServer(ActionEvent actionEvent) throws IOException, ClassNotFoundException {
+        String filename = listFileServer.getSelectionModel().getSelectedItem();
+        Path path = Paths.get(serverRoot.toString(), filename);
+        String clientDir = clientRoot.toAbsolutePath().toString();
+        os.writeObject(new FileRequest(path,clientDir));
+        os.flush();
+
     }
 
     public void deleteFileOnServer(ActionEvent actionEvent) throws IOException {

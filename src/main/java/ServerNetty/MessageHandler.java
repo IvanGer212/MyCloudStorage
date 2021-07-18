@@ -4,6 +4,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,6 +24,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             }
             break;
         case FILE_REQUEST:
+            FileRequest fileRequest = (FileRequest) command;
+            try (FileOutputStream fos = new FileOutputStream(fileRequest.getClientDir()+"/"+fileRequest.getFileName())){
+                fos.write(fileRequest.getFileData());
+            }
             break;
         case LIST_MESSAGE:
             break;
