@@ -5,6 +5,8 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
@@ -40,15 +42,29 @@
             <Font name="Tahoma" size="40.0" />
          </font>
       </Label>
-      <Button layoutX="347.0" layoutY="169.0" mnemonicParsing="false" onAction="#refreshClient" prefHeight="42.0" prefWidth="73.0" text="Refresh">
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="347.0" layoutY="169.0" mnemonicParsing="false" onAction="#refreshClient" prefHeight="42.0" prefWidth="73.0" text="Refresh">
          <font>
             <Font name="Tahoma" size="15.0" />
          </font>
+         <graphic>
+            <ImageView fitHeight="33.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/refresh_icon.png" />
+               </image>
+            </ImageView>
+         </graphic>
       </Button>
-      <Button layoutX="913.0" layoutY="169.0" mnemonicParsing="false" onAction="#refreshServer" prefHeight="42.0" prefWidth="73.0" text="Refresh">
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="905.0" layoutY="169.0" mnemonicParsing="false" onAction="#refreshServer" prefHeight="25.0" prefWidth="73.0" text="Refresh">
          <font>
             <Font name="Tahoma" size="15.0" />
          </font>
+         <graphic>
+            <ImageView fitHeight="32.0" fitWidth="53.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/refresh_icon.png" />
+               </image>
+            </ImageView>
+         </graphic>
       </Button>
       <Label layoutX="579.0" layoutY="169.0" prefHeight="42.0" prefWidth="315.0" style="-fx-background-color: #FAFAFA;" text="Label">
          <font>
@@ -60,15 +76,57 @@
             <Font name="Arial" size="16.0" />
          </font>
       </Label>
-      <Button layoutX="579.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewFileOnServer" prefHeight="51.0" prefWidth="95.0" text="New Files" />
-      <Button layoutX="689.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewDirOnServer" prefHeight="51.0" prefWidth="95.0" text="New Folder" />
-      <Button layoutX="799.0" layoutY="73.0" mnemonicParsing="false" onAction="#renameFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Rename File" />
-      <Button layoutX="902.0" layoutY="73.0" mnemonicParsing="false" onAction="#deleteFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Delete File" />
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="579.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewFileOnServer" prefHeight="34.0" prefWidth="95.0" text="New Files">
+         <graphic>
+            <ImageView fitHeight="150.0" fitWidth="43.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/docs_icon.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="689.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewDirOnServer" prefHeight="51.0" prefWidth="95.0" text="New Folder">
+         <graphic>
+            <ImageView fitHeight="38.0" fitWidth="57.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/folder_office_icon.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
+      <Button contentDisplay="CENTER" layoutX="799.0" layoutY="73.0" mnemonicParsing="false" onAction="#renameFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Rename File" />
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="902.0" layoutY="73.0" mnemonicParsing="false" onAction="#deleteFileOnServer" prefHeight="51.0" prefWidth="95.0" text="Delete File">
+         <graphic>
+            <ImageView fitHeight="43.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/delete_icon.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
       <TextField fx:id="newFilename" layoutX="579.0" layoutY="137.0" prefHeight="25.0" prefWidth="110.0" />
-      <Button layoutX="20.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewFileOnClient" prefHeight="51.0" prefWidth="95.0" text="New Files" />
-      <Button layoutX="126.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewDirOnClient" prefHeight="51.0" prefWidth="95.0" text="New Folder" />
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="20.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewFileOnClient" prefHeight="51.0" prefWidth="95.0" text="New Files">
+         <graphic>
+            <ImageView fitHeight="53.0" fitWidth="42.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/docs_icon.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="126.0" layoutY="73.0" mnemonicParsing="false" onAction="#createNewDirOnClient" prefHeight="51.0" prefWidth="95.0" text="New Folder">
+         <graphic>
+            <ImageView fitHeight="41.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/folder_office_icon.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
       <Button layoutX="232.0" layoutY="73.0" mnemonicParsing="false" onAction="#renameFileOnClient" prefHeight="51.0" prefWidth="95.0" text="Rename File" />
-      <Button layoutX="336.0" layoutY="73.0" mnemonicParsing="false" onAction="#deleteFileOnClient" prefHeight="51.0" prefWidth="95.0" text="Delete File" />
+      <Button contentDisplay="GRAPHIC_ONLY" layoutX="336.0" layoutY="73.0" mnemonicParsing="false" onAction="#deleteFileOnClient" prefHeight="51.0" prefWidth="95.0" text="Delete File">
+         <graphic>
+            <ImageView fitHeight="43.0" fitWidth="150.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../assets/delete_icon.png" />
+               </image>
+            </ImageView>
+         </graphic></Button>
       <TextField fx:id="newFilenameClient" layoutX="20.0" layoutY="137.0" prefHeight="25.0" prefWidth="110.0" />
    </children>
 </AnchorPane>

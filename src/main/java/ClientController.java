@@ -4,10 +4,12 @@ import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.ResourceBundle;
 
 public class ClientController implements Initializable {
@@ -24,10 +27,14 @@ public class ClientController implements Initializable {
     public ListView<String> listFileServer;
     public TextField newFilename;
     public TextField newFilenameClient;
+    public Label helpNewFile;
+    public AnchorPane window_setText;
+    public Button upClientDir, upServDir;
     private ObjectEncoderOutputStream os;
-    private ObjectDecoderInputStream is;
     public Path serverRoot = Paths.get("server_dir");
-    public Path clientRoot = Paths.get("dir");
+    private ObjectDecoderInputStream is;
+    public Path clientRoot = Paths.get("dir").toAbsolutePath();
+   // public ButtonType button;
 
 
     public void uploadOnServer(ActionEvent actionEvent) throws IOException {
@@ -45,13 +52,26 @@ public class ClientController implements Initializable {
             is = new ObjectDecoderInputStream(socket.getInputStream());
            File dir = new File(clientRoot.toString());
             listFileClient.getItems().addAll(dir.list());
-            File serverDir = new File(serverRoot.toString());
-            listFileServer.getItems().addAll(serverDir.list());
+            os.writeObject(new ListRequest());
+            os.flush();
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
-                    Message message = (Message) is.readObject();
-                    Platform.runLater(()->status.setText(message.toString()));
+                    AbstractCommand command = (AbstractCommand) is.readObject();
+                    switch (command.getType()) {
+                        case LIST_MESSAGE:
+                            ListResponse response = (ListResponse) command;
+                            List<String> nameFilesOnServer = response.getListFromServer();
+                            refreshFileListOnServer(nameFilesOnServer);
+                            break;
+                        case REQUEST_SERVER_DIR:
+                            ResponseServerDir serverDir = (ResponseServerDir) command;
+                            String name = serverDir.getNameServerDir();
+                            serverRoot.resolve(Paths.get(name));
+                            //Platform.runLater(()->serverRoot);
+                            break;
+
+                    }
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -66,10 +86,17 @@ public class ClientController implements Initializable {
 
     }
 
-    public void refreshServer(ActionEvent actionEvent) {
-        File serverDir = new File(serverRoot.toString());
-        listFileServer.getItems().clear();
-        listFileServer.getItems().addAll(serverDir.list());
+    private void refreshFileListOnServer (List<String> fileName){
+        Platform.runLater(()-> {
+                listFileServer.getItems().clear();
+                listFileServer.getItems().addAll(fileName);
+                }
+                );
+    }
+
+    public void refreshServer(ActionEvent actionEvent) throws IOException {
+        os.writeObject(new ListRequest());
+        os.flush();
     }
 
     public void refreshClient(ActionEvent actionEvent) {
@@ -93,12 +120,6 @@ public class ClientController implements Initializable {
          os.flush();
     }
 
-    public void createNewFileOnServer(ActionEvent actionEvent) throws IOException {
-        String filename = newFilename.getText();
-        os.writeObject(new FileCreater(Paths.get(serverRoot.toString(),filename)));
-        os.flush();
-    }
-
     public void renameFileOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileServer.getSelectionModel().getSelectedItem();
         String renameName = newFilename.getText();
@@ -108,24 +129,17 @@ public class ClientController implements Initializable {
 
     }
 
-    public void createNewFileOnClient(ActionEvent actionEvent) throws IOException {
-        String filename = newFilenameClient.getText();
-        os.writeObject(new FileCreater(Paths.get(clientRoot.toString(),filename)));
-        os.flush();
-    }
-
     public void renameFileOnClient(ActionEvent actionEvent) throws IOException {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
         String renameName = newFilenameClient.getText();
-        Object obj = new RenameRequest(Paths.get(clientRoot.toString(), filename),renameName);
-        os.writeObject(obj);
-        os.flush();
+        Path source = Paths.get(clientRoot.toString(), filename);
+        Files.move(source,source.resolveSibling(renameName)).toString();
     }
 
     public void deleteFileOnClient(ActionEvent actionEvent) throws IOException {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
-        os.writeObject(new FileDeleter(Paths.get(clientRoot.toString(),filename)));
-        os.flush();
+        Path file = Paths.get(clientRoot.toString(),filename);
+        Files.delete(file);
     }
 
     public void createNewDirOnServer(ActionEvent actionEvent) throws IOException {
@@ -136,31 +150,23 @@ public class ClientController implements Initializable {
 
     public void createNewDirOnClient(ActionEvent actionEvent) throws IOException {
         String dirname = newFilenameClient.getText();
-        os.writeObject(new DirCreater(Paths.get(clientRoot.toString()),dirname));
-        os.flush();
+        Path newDirClient = Files.createDirectories(Paths.get(clientRoot.toString(), dirname));
     }
 
-    public void goOnDirServer(MouseEvent mouseEvent) {
-        if (mouseEvent.isStillSincePress()){
-        String selectDir = listFileServer.getSelectionModel().getSelectedItem();
-        if (Files.isDirectory(serverRoot.resolve(selectDir))){
-            serverRoot = serverRoot.resolve(selectDir);
-        File serverDir = new File(serverRoot.toString());
-        listFileServer.getItems().clear();
-        listFileServer.getItems().addAll(serverDir.list());
-        }
+    public void goOnDirServer(MouseEvent mouseEvent) throws IOException {
+        if (mouseEvent.isStillSincePress() && mouseEvent.getClickCount() == 2){
+            String selectDir = listFileServer.getSelectionModel().getSelectedItem();
+            os.writeObject(new GoToDir(selectDir));
+            os.flush();
         }
     }
-    public void upToServerDir(ActionEvent actionEvent) {
-        serverRoot = serverRoot.getParent();
-        File serverDir = new File(serverRoot.toString());
-        listFileServer.getItems().clear();
-        listFileServer.getItems().addAll(serverDir.list());
-
+    public void upToServerDir(ActionEvent actionEvent) throws IOException {
+            os.writeObject(new UpServerRequest());
+            os.flush();
     }
 
     public void goOnDirClient(MouseEvent mouseEvent) {
-        if (mouseEvent.isStillSincePress()){
+        if (mouseEvent.isStillSincePress() && mouseEvent.getClickCount() == 2){
             String selectDir = listFileClient.getSelectionModel().getSelectedItem();
             if (Files.isDirectory(clientRoot.resolve(selectDir))){
                 clientRoot = clientRoot.resolve(selectDir);
@@ -176,5 +182,77 @@ public class ClientController implements Initializable {
         File clientDir = new File(clientRoot.toString());
         listFileClient.getItems().clear();
         listFileClient.getItems().addAll(clientDir.list());
+    }
+
+    public void setHelpMessageNewFolder(MouseEvent mouseEvent) {
+        helpNewFile.setLayoutX(730);
+        helpNewFile.setVisible(true);
+        helpNewFile.setText("Создать новую папку");
+    }
+
+    public void resetHelpMessageNewFolder(MouseEvent mouseEvent) {
+        helpNewFile.setVisible(false);
+        //helpNewFile.setText("");
+    }
+
+    public void setHelpMessageRenameSerFile(MouseEvent mouseEvent) {
+        helpNewFile.setLayoutX(820);
+        helpNewFile.setVisible(true);
+        helpNewFile.setText(" Изменить название");
+    }
+
+    public void resetHelpMessageRenameSerFile(MouseEvent mouseEvent) {
+        helpNewFile.setVisible(false);
+        //helpNewFile.setText("");
+    }
+
+    public void setHelpMessageDeleteFileServ(MouseEvent mouseEvent) {
+        helpNewFile.setLayoutX(860);
+        helpNewFile.setVisible(true);
+        helpNewFile.setText(" Удалить файл");
+    }
+
+    public void resetHelpMessageDeleteFileServ(MouseEvent mouseEvent) {
+        helpNewFile.setVisible(false);
+        //helpNewFile.setText("");
+    }
+
+        public void setHelpMessageNewFolderClient(MouseEvent mouseEvent) {
+        helpNewFile.setLayoutX(180);
+        helpNewFile.setVisible(true);
+        helpNewFile.setText("Создать новую папку");
+    }
+
+    public void setHelpMessageRenameClientFile(MouseEvent mouseEvent) {
+        helpNewFile.setLayoutX(280);
+        helpNewFile.setVisible(true);
+        helpNewFile.setText(" Изменить название");
+    }
+
+    public void resetHelpMessageRenameClientFile(MouseEvent mouseEvent) {
+        helpNewFile.setVisible(false);
+        //helpNewFile.setText("");
+    }
+
+    public void setHelpMessageDeleteFilecCient(MouseEvent mouseEvent) {
+        helpNewFile.setLayoutX(380);
+        helpNewFile.setVisible(true);
+        helpNewFile.setText(" Удалить файл");
+    }
+
+    public void resetHelpMessageDeleteFilecCient(MouseEvent mouseEvent) {
+        helpNewFile.setVisible(false);
+        //helpNewFile.setText("");
+    }
+
+   public void resetHelpMessageNewFolderClient(MouseEvent mouseEvent) {
+        helpNewFile.setVisible(false);
+        //helpNewFile.setText("");
+    }
+
+    public void apply(ActionEvent actionEvent) {
+    }
+
+    public void cancel(ActionEvent actionEvent) {
     }
 }

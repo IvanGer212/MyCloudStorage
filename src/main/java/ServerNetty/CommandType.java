@@ -9,7 +9,10 @@ public enum CommandType {
     LIST_MESSAGE,
     DELETE_REQUEST,
     RENAME_REQUEST,
-    FILE_CREATE,
-    DIR_CREATE
+    DIR_CREATE,
+    UP_SERVER_DIR,
+    REQUEST_SERVER_DIR,
+    GO_TO_DIR,
+    REFRESH_FILE_LIST
 
 }

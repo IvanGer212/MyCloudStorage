@@ -13,6 +13,12 @@ import java.nio.file.Paths;
 @Slf4j
 public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand> {
 
+    private Path serverRoot;
+
+    public MessageHandler() {
+        serverRoot = Paths.get("server_dir");
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, AbstractCommand command) throws Exception {
     log.debug("received {}", command);
@@ -30,8 +36,13 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             }
             break;
         case LIST_MESSAGE:
+            ListResponse listResponse = (ListResponse) command;
+            ctx.writeAndFlush(listResponse.getListFromServer());
             break;
         case LIST_REQUEST:
+            //ListRequest listRequest = (ListRequest) command;
+            ctx.writeAndFlush(new ListResponse(serverRoot));
+
             break;
         case DELETE_REQUEST:
             FileDeleter deleter = (FileDeleter) command;
@@ -39,6 +50,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             String dirDel = deleter.getDir();
             Path file = Paths.get(dirDel,filename);
             Files.delete(file);
+
             break;
         case RENAME_REQUEST:
             {
@@ -49,18 +61,34 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
                 Files.move(source,source.resolveSibling(newFilename)).toString();
             break;
             }
-        case FILE_CREATE:
-            FileCreater fileCreater = (FileCreater) command;
-            String filename1 = fileCreater.getFilename();
-            String dirCreate = fileCreater.getDirName();
-            Files.createFile(Paths.get(dirCreate, filename1));
-            break;
+
         case DIR_CREATE:
             DirCreater dirCreater = (DirCreater) command;
             String dir1 = dirCreater.getDir();
             String newDir = dirCreater.getNewDir();
             Files.createDirectories(Paths.get(dir1,newDir));
             break;
+
+        case UP_SERVER_DIR:
+            if (serverRoot.getParent() != null){
+                serverRoot = serverRoot.getParent();
+            }
+            //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
+            ctx.writeAndFlush(new ListResponse(serverRoot));
+            break;
+        case GO_TO_DIR:
+            GoToDir goToDir = (GoToDir) command;
+            Path newPath = serverRoot.resolve(goToDir.getDirName());
+            if (Files.isDirectory(newPath)){
+                serverRoot = newPath;
+            }
+            //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
+            ctx.writeAndFlush(new ListResponse(serverRoot));
+            break;
+        case REFRESH_FILE_LIST:
+            //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
+            ctx.writeAndFlush(new ListResponse(serverRoot));
+
     }
     }
 }
