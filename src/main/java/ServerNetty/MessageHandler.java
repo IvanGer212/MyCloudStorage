@@ -1,14 +1,19 @@
 package ServerNetty;
 
+import DB.AuthenticationService;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 @Slf4j
 public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand> {
@@ -88,6 +93,16 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
         case REFRESH_FILE_LIST:
             //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
+        case AUTHENTICATION:
+            AuthenticationRequest authenticationRequest = (AuthenticationRequest) command;
+            String login = authenticationRequest.getLogin();
+            String password = authenticationRequest.getPassword();
+            AuthenticationService authenticationService = new AuthenticationService();
+            Optional<AuthenticationService.Entry> entryForAuthentication = authenticationService.getEntryForAuthentication(login, password);
+            if (entryForAuthentication.isPresent()){
+                ctx.writeAndFlush(entryForAuthentication);
+            } else
+                ctx.writeAndFlush(null);
 
     }
     }

@@ -1,3 +1,4 @@
+import DB.AuthenticationService;
 import ServerNetty.*;
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
@@ -34,6 +35,8 @@ public class ClientController implements Initializable {
     public Path serverRoot = Paths.get("server_dir");
     private ObjectDecoderInputStream is;
     public Path clientRoot = Paths.get("dir").toAbsolutePath();
+    public int idClient;
+    public String nameClient;
    // public ButtonType button;
 
 
@@ -70,6 +73,10 @@ public class ClientController implements Initializable {
                             serverRoot.resolve(Paths.get(name));
                             //Platform.runLater(()->serverRoot);
                             break;
+                        case AUTHENTICATION_RESP:
+                            AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
+                            idClient = authenticationResponse.getEntry().get().getIdClient();
+                            nameClient = authenticationResponse.getEntry().get().getName();
 
                     }
                 }
@@ -185,7 +192,7 @@ public class ClientController implements Initializable {
     }
 
     public void setHelpMessageNewFolder(MouseEvent mouseEvent) {
-        helpNewFile.setLayoutX(730);
+        helpNewFile.setLayoutX(700);
         helpNewFile.setVisible(true);
         helpNewFile.setText("Создать новую папку");
     }
@@ -196,7 +203,7 @@ public class ClientController implements Initializable {
     }
 
     public void setHelpMessageRenameSerFile(MouseEvent mouseEvent) {
-        helpNewFile.setLayoutX(820);
+        helpNewFile.setLayoutX(810);
         helpNewFile.setVisible(true);
         helpNewFile.setText(" Изменить название");
     }
@@ -218,13 +225,13 @@ public class ClientController implements Initializable {
     }
 
         public void setHelpMessageNewFolderClient(MouseEvent mouseEvent) {
-        helpNewFile.setLayoutX(180);
+        helpNewFile.setLayoutX(120);
         helpNewFile.setVisible(true);
         helpNewFile.setText("Создать новую папку");
     }
 
     public void setHelpMessageRenameClientFile(MouseEvent mouseEvent) {
-        helpNewFile.setLayoutX(280);
+        helpNewFile.setLayoutX(240);
         helpNewFile.setVisible(true);
         helpNewFile.setText(" Изменить название");
     }

@@ -13,13 +13,15 @@ public class AuthenticationService {
             Users_Repository users_repository = new Users_Repository();
             return users_repository.getNameForAuthentication(login, password);
     }
-
+        @Getter
         public static class Entry {
-            private String name;
-            private String login;
-            private String password;
+            private final int idClient;
+            private final String name;
+            private final String login;
+            private final String password;
 
-            public Entry (String name, String login, String password) {
+            public Entry (int id, String name, String login, String password) {
+                this.idClient = id;
                 this.name = name;
                 this.login = login;
                 this.password = password;

@@ -17,7 +17,7 @@ public class Users_Repository {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()){
                 return Optional.of(new AuthenticationService.Entry(
-                            //resultSet.getInt("id"),
+                            resultSet.getInt("id"),
                             resultSet.getString("Name"),
                             resultSet.getString("Login"),
                             resultSet.getString("Password")

@@ -1,5 +1,6 @@
 package ServerNetty;
 
+import DB.AuthenticationService;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
@@ -15,7 +16,11 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NettyServer {
+
+    private static final AuthenticationService authenticationService = new AuthenticationService();
+
     public static void main(String[] args) throws InterruptedException {
+
         EventLoopGroup auth = new NioEventLoopGroup(1);
         EventLoopGroup worker = new NioEventLoopGroup();
         ServerBootstrap bootstrap = new ServerBootstrap();
@@ -37,5 +42,9 @@ public class NettyServer {
 
         auth.shutdownGracefully();
         worker.shutdownGracefully();
+    }
+
+    public AuthenticationService getAuthenticationService() {
+        return authenticationService;
     }
 }
