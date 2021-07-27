@@ -28,21 +28,22 @@ public class ClientController implements Initializable {
     public ListView<String> listFileClient;
     public Label status;
     public ListView<String> listFileServer;
-    public TextField newFilename;
     public TextField newFilenameClient;
     public Label helpNewFile;
     public AnchorPane window_setText;
     public Button upClientDir, upServDir;
     public TextField loginClient;
     public PasswordField passwordClient;
+    public TextField newFilenameServer;
     private ObjectEncoderOutputStream os;
     public Path serverRoot = Paths.get("server_dir");
     private ObjectDecoderInputStream is;
     public Path clientRoot = Paths.get("dir").toAbsolutePath();
     public int idClient;
     public String nameClient;
-   // public ButtonType button;
-   private Node node;
+    private Node node;
+
+
 
 
     public void uploadOnServer(ActionEvent actionEvent) throws IOException {
@@ -59,9 +60,9 @@ public class ClientController implements Initializable {
             os = new ObjectEncoderOutputStream(socket.getOutputStream());
             is = new ObjectDecoderInputStream(socket.getInputStream());
             File dir = new File(clientRoot.toString());
-            //listFileClient.getItems().addAll(dir.list());
-            //os.writeObject(new ListRequest());
-            //os.flush();
+            listFileClient.getItems().addAll(dir.list());
+            os.writeObject(new ListRequest(idClient));
+            os.flush();
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
@@ -80,14 +81,17 @@ public class ClientController implements Initializable {
                             break;
                         case AUTHENTICATION_RESP:
                             AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
-                            if (authenticationResponse.getEntry().isPresent()) {
-                                idClient = authenticationResponse.getEntry().get().getIdClient();
-                                nameClient = authenticationResponse.getEntry().get().getName();
-                                Stage stage = (Stage) node.getScene().getWindow();
-                                Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
-                                stage.setScene(new Scene(parent));
-                                stage.show();
-                            }
+                            idClient = authenticationResponse.getIdClient();
+                            nameClient = authenticationResponse.getNameClient();
+                            //try {
+                            //    Stage stage = (Stage) node.getScene().getWindow();
+                            //    Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
+                            //    stage.setScene(new Scene(parent));
+                            //    stage.show();
+                            //} catch (Exception e){
+                            //    e.printStackTrace();
+                            //}
+
                     }
                 }
             }catch (Exception e){
@@ -107,12 +111,13 @@ public class ClientController implements Initializable {
         Platform.runLater(()-> {
                 listFileServer.getItems().clear();
                 listFileServer.getItems().addAll(fileName);
+                //serverRoot =
                 }
                 );
     }
 
     public void refreshServer(ActionEvent actionEvent) throws IOException {
-        os.writeObject(new ListRequest());
+        os.writeObject(new ListRequest(1));
         os.flush();
     }
 
@@ -139,7 +144,7 @@ public class ClientController implements Initializable {
 
     public void renameFileOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileServer.getSelectionModel().getSelectedItem();
-        String renameName = newFilename.getText();
+        String renameName = newFilenameServer.getText();
         Object obj = new RenameRequest(Paths.get(serverRoot.toString(), filename),renameName);
         os.writeObject(obj);
         os.flush();
@@ -147,10 +152,11 @@ public class ClientController implements Initializable {
     }
 
     public void renameFileOnClient(ActionEvent actionEvent) throws IOException {
-        String filename = listFileClient.getSelectionModel().getSelectedItem();
+        String selectFile = listFileClient.getSelectionModel().getSelectedItem();
         String renameName = newFilenameClient.getText();
-        Path source = Paths.get(clientRoot.toString(), filename);
+        Path source = Paths.get(clientRoot.toString(), selectFile);
         Files.move(source,source.resolveSibling(renameName)).toString();
+
     }
 
     public void deleteFileOnClient(ActionEvent actionEvent) throws IOException {
@@ -160,7 +166,7 @@ public class ClientController implements Initializable {
     }
 
     public void createNewDirOnServer(ActionEvent actionEvent) throws IOException {
-        String dirname = newFilename.getText();
+        String dirname = newFilenameServer.getText();
         os.writeObject(new DirCreater(Paths.get(serverRoot.toString()),dirname));
         os.flush();
     }
@@ -267,17 +273,42 @@ public class ClientController implements Initializable {
         //helpNewFile.setText("");
     }
 
-    public void apply(ActionEvent actionEvent) {
+    public void apply(ActionEvent actionEvent) throws IOException {
     }
 
     public void cancel(ActionEvent actionEvent) {
     }
 
     public void tryConnectWithServer(ActionEvent actionEvent) throws IOException {
-        node = (Node) actionEvent.getSource();
         String login = loginClient.getText();
         String password = passwordClient.getText();
         os.writeObject(new AuthenticationRequest(login,password));
+        os.flush();
+        node = (Node) actionEvent.getSource();
+        try {
+            Stage stage = (Stage) node.getScene().getWindow();
+            Parent parent = FXMLLoader.load(getClass().getResource("Cloud_Authentication_window.fxml"));
+            stage.setScene(new Scene(parent));
+            stage.show();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+    }
+
+    public void changeScreen(ActionEvent actionEvent) throws IOException {
+        node = (Node) actionEvent.getSource();
+        try {
+            Stage stage = (Stage) node.getScene().getWindow();
+            Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
+            stage.setScene(new Scene(parent));
+            stage.show();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        File dir = new File(clientRoot.toString());
+        //listFileClient.getItems().addAll(dir.list());
+        os.writeObject(new ListRequest(idClient));
         os.flush();
     }
 }

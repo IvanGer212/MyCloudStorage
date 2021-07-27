@@ -35,40 +35,36 @@ public class Start_window implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         try {
-            Socket socket = new Socket("Localhost", 8188);
+            Socket socket = new Socket("Localhost",8188);
             os = new ObjectEncoderOutputStream(socket.getOutputStream());
             is = new ObjectDecoderInputStream(socket.getInputStream());
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
-                    Optional optional = (Optional) is.readObject();
-                    //AbstractCommand command = (AbstractCommand) is.readObject();
-                    //switch (command.getType()) {
-                    //    case AUTHENTICATION_RESP:
-                    //        AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
-                    //        if (authenticationResponse.getEntry().isPresent()){
-                    //if (optional.isPresent()){
-                    //            idClient = ;
-                    //            nameClient = entry.getName();
-                    //            Stage stage = (Stage) node.getScene().getWindow();
-                    //            Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
-                    //            stage.setScene(new Scene(parent));
-                    //            stage.show();
+                    AbstractCommand command = (AbstractCommand) is.readObject();
+                    switch (command.getType()) {
+                        case AUTHENTICATION_RESP:
+                            AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
+                           idClient = authenticationResponse.getIdClient();
+                            nameClient = authenticationResponse.getNameClient();
+                            try {
+                                Stage stage = (Stage) node.getScene().getWindow();
+                                Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
+                                stage.setScene(new Scene(parent));
+                                stage.show();
+                            }
+                            catch (Exception e){
+                                e.printStackTrace();
+                            }
                                 //idClient = authenticationResponse.getEntry().get().getIdClient();
                                 //nameClient = authenticationResponse.getEntry().get().getName();
                             }
-                } catch (IOException e) {
-                e.printStackTrace();
-            } catch (ClassNotFoundException e) {
+                }
+            } catch (Exception e){
                 e.printStackTrace();
             }
-         //   }
-
-        //    } catch (Exception e){
-        //        e.printStackTrace();
-        //    }
-
-        });
+            }
+        );
             readThread.setDaemon(true);
             readThread.start();
         } catch (Exception e){
@@ -78,13 +74,9 @@ public class Start_window implements Initializable {
 
     public void tryConnectWithServer(ActionEvent actionEvent) throws IOException {
         node = (Node) actionEvent.getSource();
-        Stage stage = (Stage) node.getScene().getWindow();
-        Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
-        stage.setScene(new Scene(parent));
-        stage.show();
-        //String login = loginClient.getText();
-        //String password = passwordClient.getText();
-        //os.writeObject(new AuthenticationRequest(login,password));
-        //os.flush();
+        String login = loginClient.getText();
+        String password = passwordClient.getText();
+        os.writeObject(new AuthenticationRequest(login,password));
+        os.flush();
     }
 }

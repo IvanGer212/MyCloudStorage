@@ -1,6 +1,8 @@
 package ServerNetty;
 
 import DB.AuthenticationService;
+import DB.UsersFilesOnServer;
+import DB.Users_Repository;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
@@ -13,6 +15,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -45,9 +48,14 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             ctx.writeAndFlush(listResponse.getListFromServer());
             break;
         case LIST_REQUEST:
-            //ListRequest listRequest = (ListRequest) command;
+            ListRequest listRequest = (ListRequest) command;
+            UsersFilesOnServer usersFilesOnServer = new UsersFilesOnServer();
+            Optional<UsersFilesOnServer.ParentDir> usersParentDirOnServer = usersFilesOnServer.getUsersParentDirOnServer(listRequest.getIdClient());
+            serverRoot = Paths.get(usersParentDirOnServer.get().getDirName());
+            //UsersFilesOnServer usersFilesOnServer = new UsersFilesOnServer();
+            //List<String> usersFilesOnServer1 = usersFilesOnServer.getUsersFilesOnServer(listRequest.getIdClient());
+            //ctx.writeAndFlush(new ListResponse(usersFilesOnServer1));
             ctx.writeAndFlush(new ListResponse(serverRoot));
-
             break;
         case DELETE_REQUEST:
             FileDeleter deleter = (FileDeleter) command;
@@ -81,6 +89,8 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
+        case REQUEST_SERVER_DIR:
+            break;
         case GO_TO_DIR:
             GoToDir goToDir = (GoToDir) command;
             Path newPath = serverRoot.resolve(goToDir.getDirName());
@@ -100,12 +110,13 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             String password = authenticationRequest.getPassword();
             AuthenticationService authenticationService = new AuthenticationService();
             Optional<AuthenticationService.Entry> entryForAuthentication = authenticationService.getEntryForAuthentication(login, password);
+            int idClient = entryForAuthentication.get().getIdClient();
+            String name = entryForAuthentication.get().getName();
             if (entryForAuthentication.isPresent()){
-                ctx.writeAndFlush(new AuthenticationResponse(entryForAuthentication));
+                ctx.writeAndFlush(new AuthenticationResponse(idClient,name));
             } else
             {ctx.writeAndFlush(null);}
             break;
-
     }
     }
 }

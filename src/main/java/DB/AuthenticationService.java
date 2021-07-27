@@ -3,6 +3,7 @@ package DB;
 import lombok.Getter;
 import lombok.ToString;
 
+import java.io.Serializable;
 import java.util.Optional;
 
 @Getter
@@ -14,7 +15,7 @@ public class AuthenticationService {
             return users_repository.getNameForAuthentication(login, password);
     }
         @Getter
-        public static class Entry {
+        public static class Entry implements Serializable {
             private final int idClient;
             private final String name;
             private final String login;
