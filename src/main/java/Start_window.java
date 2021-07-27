@@ -47,13 +47,13 @@ public class Start_window implements Initializable {
                     //    case AUTHENTICATION_RESP:
                     //        AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
                     //        if (authenticationResponse.getEntry().isPresent()){
-                    if (optional.isPresent()){
-                                idClient = ;
-                                nameClient = entry.getName();
-                                Stage stage = (Stage) node.getScene().getWindow();
-                                Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
-                                stage.setScene(new Scene(parent));
-                                stage.show();
+                    //if (optional.isPresent()){
+                    //            idClient = ;
+                    //            nameClient = entry.getName();
+                    //            Stage stage = (Stage) node.getScene().getWindow();
+                    //            Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
+                    //            stage.setScene(new Scene(parent));
+                    //            stage.show();
                                 //idClient = authenticationResponse.getEntry().get().getIdClient();
                                 //nameClient = authenticationResponse.getEntry().get().getName();
                             }
@@ -62,11 +62,11 @@ public class Start_window implements Initializable {
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            }
+         //   }
 
-            } catch (Exception e){
-                e.printStackTrace();
-            }
+        //    } catch (Exception e){
+        //        e.printStackTrace();
+        //    }
 
         });
             readThread.setDaemon(true);

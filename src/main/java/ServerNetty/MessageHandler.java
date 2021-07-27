@@ -93,6 +93,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
         case REFRESH_FILE_LIST:
             //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
+            break;
         case AUTHENTICATION:
             AuthenticationRequest authenticationRequest = (AuthenticationRequest) command;
             String login = authenticationRequest.getLogin();
@@ -100,9 +101,10 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             AuthenticationService authenticationService = new AuthenticationService();
             Optional<AuthenticationService.Entry> entryForAuthentication = authenticationService.getEntryForAuthentication(login, password);
             if (entryForAuthentication.isPresent()){
-                ctx.writeAndFlush(entryForAuthentication);
+                ctx.writeAndFlush(new AuthenticationResponse(entryForAuthentication));
             } else
-                ctx.writeAndFlush(null);
+            {ctx.writeAndFlush(null);}
+            break;
 
     }
     }
