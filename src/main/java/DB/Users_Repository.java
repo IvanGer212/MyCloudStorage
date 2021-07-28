@@ -36,4 +36,50 @@ public class Users_Repository {
 
         return Optional.empty();
     }
+
+    public Optional<UsersFilesOnServer.ParentDir> getUsersParentDirOnServer (int clientId) {
+        Connection connection = DB_connection.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT parent_folder FROM cloud_users WHERE id = ?;");
+            preparedStatement.setInt(1, clientId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(new UsersFilesOnServer.ParentDir(
+                        resultSet.getString("parent_folder")
+
+                ));
+            }else return null; //Optional.empty();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        return null; //Optional.empty();
+    }
+
+    public boolean createNewUserParentDir (int clientId, String clientName){
+        Connection connection = DB_connection.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE cloud_users SET parent_folder = ? where id = ?;");
+            preparedStatement.setString(1, clientName);
+            preparedStatement.setInt(2,clientId);
+            int i = preparedStatement.executeUpdate();
+            return i!=0;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        finally {
+            try {
+                connection.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        return false;
+    }
 }

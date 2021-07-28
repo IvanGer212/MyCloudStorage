@@ -15,11 +15,13 @@ import java.util.stream.Collectors;
 public class ListResponse extends AbstractCommand{
 
     private final List<String> listFromServer;
+    private final String rootDir;
 
     public ListResponse (Path path) throws IOException {
         listFromServer = Files.list(path)
                 .map(p -> p.getFileName().toString())
                 .collect(Collectors.toList());
+        rootDir = path.toString();
     }
 
     @Override

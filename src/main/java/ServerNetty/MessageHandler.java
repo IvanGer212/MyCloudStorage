@@ -1,6 +1,7 @@
 package ServerNetty;
 
 import DB.AuthenticationService;
+import DB.UsersFilesOnServer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
@@ -19,6 +20,7 @@ import java.util.Optional;
 public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand> {
 
     private Path serverRoot;
+    private String parentRoot;
 
     public MessageHandler() {
         serverRoot = Paths.get("server_dir");
@@ -45,10 +47,24 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             ctx.writeAndFlush(listResponse.getListFromServer());
             break;
         case LIST_REQUEST:
+            ListRequest listRequest = (ListRequest) command;
+            UsersFilesOnServer usersFilesOnServer = new UsersFilesOnServer();
+            Optional<UsersFilesOnServer.ParentDir> usersParentDirOnServer = usersFilesOnServer.getUsersParentDirOnServer(listRequest.getIdClient());
+            if (!usersParentDirOnServer.get().getDirName().equals("")) {
+                serverRoot = Paths.get(usersParentDirOnServer.get().getDirName());
+            }
+            else {
+                String newDir = listRequest.getNameClient()+"_Dir";
+                Files.createDirectories(Paths.get(newDir));
+                usersFilesOnServer.setUsersParentDirOnServer(listRequest.getIdClient(),newDir);
+                Optional<UsersFilesOnServer.ParentDir> usersParentDirOnServer1 = usersFilesOnServer.getUsersParentDirOnServer(listRequest.getIdClient());
+                serverRoot = Paths.get(usersParentDirOnServer1.get().getDirName());
+            }
             //ListRequest listRequest = (ListRequest) command;
             ctx.writeAndFlush(new ListResponse(serverRoot));
 
             break;
+
         case DELETE_REQUEST:
             FileDeleter deleter = (FileDeleter) command;
             String filename = deleter.getFilename();

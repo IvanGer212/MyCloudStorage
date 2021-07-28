@@ -36,8 +36,9 @@ public class ClientController implements Initializable {
     public TextField loginClient;
     public PasswordField passwordClient;
     public Button buttonEnter;
+    public TextField newFilenameServer;
     private ObjectEncoderOutputStream os;
-    public Path serverRoot = Paths.get("server_dir");
+    public String serverRoot = "server_dir";
     private ObjectDecoderInputStream is;
     public Path clientRoot = Paths.get("dir").toAbsolutePath();
     public int idClient;
@@ -48,7 +49,7 @@ public class ClientController implements Initializable {
 
     public void uploadOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
-        os.writeObject(new FileMessage(Paths.get(clientRoot.toString(), filename),serverRoot.toAbsolutePath().toString()));
+        os.writeObject(new FileMessage(Paths.get(clientRoot.toString(), filename),Paths.get(serverRoot).toAbsolutePath().toString()));
         os.flush();
 
     }
@@ -71,12 +72,13 @@ public class ClientController implements Initializable {
                         case LIST_MESSAGE:
                             ListResponse response = (ListResponse) command;
                             List<String> nameFilesOnServer = response.getListFromServer();
+                            serverRoot = response.getRootDir();
                             refreshFileListOnServer(nameFilesOnServer);
                             break;
                         case REQUEST_SERVER_DIR:
                             ResponseServerDir serverDir = (ResponseServerDir) command;
                             String name = serverDir.getNameServerDir();
-                            serverRoot.resolve(Paths.get(name));
+                            Paths.get(serverRoot).resolve(Paths.get(name));
                             //Platform.runLater(()->serverRoot);
                             break;
                         case AUTHENTICATION_RESP:
@@ -109,7 +111,7 @@ public class ClientController implements Initializable {
     }
 
     public void refreshServer(ActionEvent actionEvent) throws IOException {
-        os.writeObject(new ListRequest());
+        os.writeObject(new ListRequest(1,"John"));
         os.flush();
     }
 
@@ -130,14 +132,14 @@ public class ClientController implements Initializable {
 
     public void deleteFileOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileServer.getSelectionModel().getSelectedItem();
-         os.writeObject(new FileDeleter(Paths.get(serverRoot.toString(),filename)));
+         os.writeObject(new FileDeleter(Paths.get(serverRoot,filename)));
          os.flush();
     }
 
     public void renameFileOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileServer.getSelectionModel().getSelectedItem();
-        String renameName = newFilename.getText();
-        Object obj = new RenameRequest(Paths.get(serverRoot.toString(), filename),renameName);
+        String renameName = newFilenameServer.getText();
+        Object obj = new RenameRequest(Paths.get(serverRoot, filename),renameName);
         os.writeObject(obj);
         os.flush();
 
@@ -157,8 +159,8 @@ public class ClientController implements Initializable {
     }
 
     public void createNewDirOnServer(ActionEvent actionEvent) throws IOException {
-        String dirname = newFilename.getText();
-        os.writeObject(new DirCreater(Paths.get(serverRoot.toString()),dirname));
+        String dirname = newFilenameServer.getText();
+        os.writeObject(new DirCreater(Paths.get(serverRoot),dirname));
         os.flush();
     }
 
