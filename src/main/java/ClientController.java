@@ -35,6 +35,7 @@ public class ClientController implements Initializable {
     public Button upClientDir, upServDir;
     public TextField loginClient;
     public PasswordField passwordClient;
+    public Button buttonEnter;
     private ObjectEncoderOutputStream os;
     public Path serverRoot = Paths.get("server_dir");
     private ObjectDecoderInputStream is;
@@ -80,14 +81,10 @@ public class ClientController implements Initializable {
                             break;
                         case AUTHENTICATION_RESP:
                             AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
-                            if (authenticationResponse.getEntry().isPresent()) {
-                                idClient = authenticationResponse.getEntry().get().getIdClient();
-                                nameClient = authenticationResponse.getEntry().get().getName();
-                                Stage stage = (Stage) node.getScene().getWindow();
-                                Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
-                                stage.setScene(new Scene(parent));
-                                stage.show();
-                            }
+                                idClient = authenticationResponse.getUserId();
+                                nameClient = authenticationResponse.getUserName();
+                                buttonEnter.setDisable(false);
+                            break;
                     }
                 }
             }catch (Exception e){
@@ -267,14 +264,31 @@ public class ClientController implements Initializable {
         //helpNewFile.setText("");
     }
 
-    public void apply(ActionEvent actionEvent) {
-    }
-
-    public void cancel(ActionEvent actionEvent) {
-    }
-
-    public void tryConnectWithServer(ActionEvent actionEvent) throws IOException {
+    public void goToRegistration(ActionEvent actionEvent) throws IOException {
         node = (Node) actionEvent.getSource();
+        Stage stage = (Stage) node.getScene().getWindow();
+        Parent parent = FXMLLoader.load(getClass().getResource("Cloud_Registration.fxml"));
+        stage.setScene(new Scene(parent));
+        stage.show();
+    }
+
+    public void goToAuthentication(ActionEvent actionEvent) throws IOException {
+        node = (Node) actionEvent.getSource();
+        Stage stage = (Stage) node.getScene().getWindow();
+        Parent parent = FXMLLoader.load(getClass().getResource("Cloud_Authentication_window.fxml"));
+        stage.setScene(new Scene(parent));
+        stage.show();
+    }
+
+    public void enterOnProgram(ActionEvent actionEvent) throws IOException {
+        node = (Node) actionEvent.getSource();
+        Stage stage = (Stage) node.getScene().getWindow();
+        Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
+        stage.setScene(new Scene(parent));
+        stage.show();
+    }
+
+    public void sendAuthDataOnServer(ActionEvent actionEvent) throws IOException {
         String login = loginClient.getText();
         String password = passwordClient.getText();
         os.writeObject(new AuthenticationRequest(login,password));

@@ -10,10 +10,12 @@ import java.util.Optional;
 @Getter
 public class AuthenticationResponse extends AbstractCommand{
 
-    private final Optional<AuthenticationService.Entry> entry;
+    private final String userName;
+    private final int userId;
 
     public AuthenticationResponse(Optional<AuthenticationService.Entry> entry) {
-        this.entry = entry;
+        userName = entry.get().getName();
+        userId = entry.get().getIdClient();
     }
 
 
