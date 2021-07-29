@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="mysql-8.0.23-winx64">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Downloads/mysql-8.0.23-winx64.zip!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
