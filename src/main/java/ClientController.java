@@ -39,6 +39,7 @@ public class ClientController implements Initializable {
     public Label statusRegistr;
     public Label curDirOnServer;
     public Label curDirOnClient;
+    public Label statusAuthentication;
     private ObjectEncoderOutputStream os;
     public String serverRoot = "server_dir";
     private ObjectDecoderInputStream is;
@@ -61,10 +62,6 @@ public class ClientController implements Initializable {
             Socket socket = new Socket("Localhost",8188);
             os = new ObjectEncoderOutputStream(socket.getOutputStream());
             is = new ObjectDecoderInputStream(socket.getInputStream());
-            File dir = new File(clientRoot.toString());
-            //listFileClient.getItems().addAll(dir.list());
-            //os.writeObject(new ListRequest());
-            //os.flush();
             Thread readThread = new Thread(()->
             { try {
                 while (true) {
@@ -75,6 +72,7 @@ public class ClientController implements Initializable {
                             List<String> nameFilesOnServer = response.getListFromServer();
                             serverRoot = response.getRootDir();
                             refreshFileListOnServer(nameFilesOnServer);
+                            Platform.runLater(()->refreshFileListOnClient());
                             break;
                         case REQUEST_SERVER_DIR:
                             ResponseServerDir serverDir = (ResponseServerDir) command;
@@ -91,6 +89,11 @@ public class ClientController implements Initializable {
                         case REGISTRATION_RESPONSE:
                             RegistrationResponse registrationResponse = (RegistrationResponse) command;
                             Platform.runLater(()->statusRegistr.setText(registrationResponse.getMsg()));
+                            break;
+                        case MESSAGE_RESPONSE:
+                            Message_Response message_response = (Message_Response) command;
+                            Platform.runLater(()->statusAuthentication.setText(message_response.getMsg()));
+                            break;
 
                     }
                 }
@@ -111,8 +114,13 @@ public class ClientController implements Initializable {
         Platform.runLater(()-> {
                 listFileServer.getItems().clear();
                 listFileServer.getItems().addAll(fileName);
-                }
-                );
+                });
+    }
+
+    private void refreshFileListOnClient(){
+        File clientDir = new File(clientRoot.toString());
+        listFileClient.getItems().clear();
+        listFileClient.getItems().addAll(clientDir.list());
     }
 
     public void refreshServer(ActionEvent actionEvent) throws IOException {
@@ -161,6 +169,7 @@ public class ClientController implements Initializable {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
         Path file = Paths.get(clientRoot.toString(),filename);
         Files.delete(file);
+        refreshFileListOnClient();
     }
 
     public void createNewDirOnServer(ActionEvent actionEvent) throws IOException {
@@ -172,6 +181,7 @@ public class ClientController implements Initializable {
     public void createNewDirOnClient(ActionEvent actionEvent) throws IOException {
         String dirname = newFilenameClient.getText();
         Files.createDirectories(Paths.get(clientRoot.toString(), dirname));
+        refreshFileListOnClient();
     }
 
     public void goOnDirServer(MouseEvent mouseEvent) throws IOException {
@@ -191,9 +201,7 @@ public class ClientController implements Initializable {
             String selectDir = listFileClient.getSelectionModel().getSelectedItem();
             if (Files.isDirectory(clientRoot.resolve(selectDir))){
                 clientRoot = clientRoot.resolve(selectDir);
-                File clientDir = new File(clientRoot.toString());
-                listFileClient.getItems().clear();
-                listFileClient.getItems().addAll(clientDir.list());
+                refreshFileListOnClient();
             }
         }
         curDirOnClient.setText(clientRoot.toString());
@@ -201,9 +209,7 @@ public class ClientController implements Initializable {
 
     public void upToClientDir(ActionEvent actionEvent) {
         clientRoot = clientRoot.getParent();
-        File clientDir = new File(clientRoot.toString());
-        listFileClient.getItems().clear();
-        listFileClient.getItems().addAll(clientDir.list());
+        refreshFileListOnClient();
         curDirOnClient.setText(clientRoot.toString());
     }
 
@@ -298,6 +304,7 @@ public class ClientController implements Initializable {
        // Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
         stage.setScene(new Scene(parent));
         stage.show();
+        refreshFileListOnClient();
     }
 
     public void sendAuthDataOnServer(ActionEvent actionEvent) throws IOException {

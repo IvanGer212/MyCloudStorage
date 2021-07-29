@@ -15,13 +15,13 @@ public class FileMessage extends AbstractCommand{
 
         name = path.getFileName().toString();
         size = Files.size(path);
-        //data = Files.readAllBytes(path);
+        data = Files.readAllBytes(path);
         this.serverDir = serverDir;
     }
 
     private final String name;
     private final long size;
-    private byte[] data;
+    private final byte[] data;
     private final String serverDir;
 
     @Override

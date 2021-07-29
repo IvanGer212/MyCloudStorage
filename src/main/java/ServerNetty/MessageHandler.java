@@ -30,12 +30,14 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             try (FileOutputStream fos = new FileOutputStream(message.getServerDir()+"/"+message.getName())){
                 fos.write(message.getData());
             }
+            ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
         case FILE_REQUEST:
             FileRequest fileRequest = (FileRequest) command;
             try (FileOutputStream fos = new FileOutputStream(fileRequest.getClientDir()+"/"+fileRequest.getFileName())){
                 fos.write(fileRequest.getFileData());
             }
+            ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
         case LIST_REQUEST:
             ListRequest listRequest = (ListRequest) command;
@@ -64,7 +66,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             String dirDel = deleter.getDir();
             Path file = Paths.get(dirDel,filename);
             Files.delete(file);
-
+            ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
         case RENAME_REQUEST:
             {
@@ -73,6 +75,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
                 String dirRename = renameRequest.getDir();
                 Path source = Paths.get(dirRename,renameRequest.getName());
                 Files.move(source,source.resolveSibling(newFilename)).toString();
+                ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
             }
 
@@ -81,6 +84,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             String dir1 = dirCreater.getDir();
             String newDir = dirCreater.getNewDir();
             Files.createDirectories(Paths.get(dir1,newDir));
+            ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
 
         case UP_SERVER_DIR:
@@ -99,10 +103,6 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
-        case REFRESH_FILE_LIST:
-            //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
-            ctx.writeAndFlush(new ListResponse(serverRoot));
-            break;
         case AUTHENTICATION:
             AuthenticationRequest authenticationRequest = (AuthenticationRequest) command;
             String login = authenticationRequest.getLogin();
@@ -112,7 +112,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             if (entryForAuthentication.isPresent()){
                 ctx.writeAndFlush(new AuthenticationResponse(entryForAuthentication));
             } else
-            {ctx.writeAndFlush(null);}
+                ctx.writeAndFlush(new Message_Response("Incorrect login or password"));
             break;
         case REGISTRATION_REQUEST:
             Registration_Req registration_req = (Registration_Req) command;
