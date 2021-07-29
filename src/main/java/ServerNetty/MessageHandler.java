@@ -2,15 +2,11 @@ package ServerNetty;
 
 import DB.AuthenticationService;
 import DB.UsersFilesOnServer;
+import DB.Users_Repository;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
 import lombok.extern.slf4j.Slf4j;
-
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,7 +16,6 @@ import java.util.Optional;
 public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand> {
 
     private Path serverRoot;
-    private String parentRoot;
 
     public MessageHandler() {
         serverRoot = Paths.get("server_dir");
@@ -42,25 +37,23 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
                 fos.write(fileRequest.getFileData());
             }
             break;
-        case LIST_MESSAGE:
-            ListResponse listResponse = (ListResponse) command;
-            ctx.writeAndFlush(listResponse.getListFromServer());
-            break;
         case LIST_REQUEST:
             ListRequest listRequest = (ListRequest) command;
             UsersFilesOnServer usersFilesOnServer = new UsersFilesOnServer();
             Optional<UsersFilesOnServer.ParentDir> usersParentDirOnServer = usersFilesOnServer.getUsersParentDirOnServer(listRequest.getIdClient());
-            if (!usersParentDirOnServer.get().getDirName().equals("")) {
-                serverRoot = Paths.get(usersParentDirOnServer.get().getDirName());
+            if (serverRoot.equals(Paths.get("server_dir"))){
+                if (!usersParentDirOnServer.get().getDirName().equals("")) {
+                    serverRoot = Paths.get(usersParentDirOnServer.get().getDirName());
+                }
+                else {
+                    String newDir = listRequest.getNameClient()+"_Dir";
+                    Files.createDirectories(Paths.get(newDir));
+                    usersFilesOnServer.setUsersParentDirOnServer(listRequest.getIdClient(),newDir);
+                    Optional<UsersFilesOnServer.ParentDir> usersParentDirOnServer1 = usersFilesOnServer.getUsersParentDirOnServer(listRequest.getIdClient());
+                    serverRoot = Paths.get(usersParentDirOnServer1.get().getDirName());
+                }
             }
-            else {
-                String newDir = listRequest.getNameClient()+"_Dir";
-                Files.createDirectories(Paths.get(newDir));
-                usersFilesOnServer.setUsersParentDirOnServer(listRequest.getIdClient(),newDir);
-                Optional<UsersFilesOnServer.ParentDir> usersParentDirOnServer1 = usersFilesOnServer.getUsersParentDirOnServer(listRequest.getIdClient());
-                serverRoot = Paths.get(usersParentDirOnServer1.get().getDirName());
-            }
-            //ListRequest listRequest = (ListRequest) command;
+            ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
 
             break;
@@ -94,7 +87,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             if (serverRoot.getParent() != null){
                 serverRoot = serverRoot.getParent();
             }
-            //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
+            ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
         case GO_TO_DIR:
@@ -103,7 +96,7 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             if (Files.isDirectory(newPath)){
                 serverRoot = newPath;
             }
-            //ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
+            ctx.writeAndFlush(new ResponseServerDir(serverRoot.toString()));
             ctx.writeAndFlush(new ListResponse(serverRoot));
             break;
         case REFRESH_FILE_LIST:
@@ -121,7 +114,24 @@ public class MessageHandler extends SimpleChannelInboundHandler<AbstractCommand>
             } else
             {ctx.writeAndFlush(null);}
             break;
-
+        case REGISTRATION_REQUEST:
+            Registration_Req registration_req = (Registration_Req) command;
+            String nameNewClient = registration_req.getName();
+            String passwordNewClient = registration_req.getPassword();
+            String loginNewClient = registration_req.getLogin();
+            String newClientDir = nameNewClient+"_Dir";
+            Users_Repository users_repository = new Users_Repository();
+            boolean resultCheckUser = users_repository.checkUserOnServer(loginNewClient);
+            if (resultCheckUser){
+                ctx.writeAndFlush(new RegistrationResponse("User with that Login already exist!"));
+            }
+            else {
+                boolean resultOfCreate = users_repository.createNewClientInBase(nameNewClient, loginNewClient, passwordNewClient, newClientDir);
+                if (resultOfCreate) {
+                    Files.createDirectories(Paths.get(newClientDir));
+                    ctx.writeAndFlush(new RegistrationResponse("New client create on server!"));
+                } else ctx.writeAndFlush(new RegistrationResponse("Error while create new client!"));
+            }
     }
     }
 }

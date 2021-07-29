@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -14,13 +15,13 @@ public class FileMessage extends AbstractCommand{
 
         name = path.getFileName().toString();
         size = Files.size(path);
-        data = Files.readAllBytes(path);
+        //data = Files.readAllBytes(path);
         this.serverDir = serverDir;
     }
 
     private final String name;
     private final long size;
-    private final byte[] data;
+    private byte[] data;
     private final String serverDir;
 
     @Override

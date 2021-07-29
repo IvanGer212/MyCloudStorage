@@ -1,4 +1,3 @@
-import DB.AuthenticationService;
 import ServerNetty.*;
 import io.netty.handler.codec.serialization.ObjectDecoderInputStream;
 import io.netty.handler.codec.serialization.ObjectEncoderOutputStream;
@@ -11,9 +10,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
@@ -31,27 +28,31 @@ public class ClientController implements Initializable {
     public TextField newFilename;
     public TextField newFilenameClient;
     public Label helpNewFile;
-    public AnchorPane window_setText;
-    public Button upClientDir, upServDir;
     public TextField loginClient;
     public PasswordField passwordClient;
     public Button buttonEnter;
     public TextField newFilenameServer;
+    public TextField nameNewClient;
+    public TextField loginNewClient;
+    public PasswordField passwordNewClient;
+    public PasswordField repeatPassword;
+    public Label statusRegistr;
+    public Label curDirOnServer;
+    public Label curDirOnClient;
     private ObjectEncoderOutputStream os;
     public String serverRoot = "server_dir";
     private ObjectDecoderInputStream is;
     public Path clientRoot = Paths.get("dir").toAbsolutePath();
     public int idClient;
     public String nameClient;
-   // public ButtonType button;
-   private Node node;
+    private Node node;
+
 
 
     public void uploadOnServer(ActionEvent actionEvent) throws IOException {
         String filename = listFileClient.getSelectionModel().getSelectedItem();
         os.writeObject(new FileMessage(Paths.get(clientRoot.toString(), filename),Paths.get(serverRoot).toAbsolutePath().toString()));
         os.flush();
-
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ClientController implements Initializable {
                             ResponseServerDir serverDir = (ResponseServerDir) command;
                             String name = serverDir.getNameServerDir();
                             Paths.get(serverRoot).resolve(Paths.get(name));
-                            //Platform.runLater(()->serverRoot);
+                            Platform.runLater(()->curDirOnServer.setText(name));
                             break;
                         case AUTHENTICATION_RESP:
                             AuthenticationResponse authenticationResponse = (AuthenticationResponse) command;
@@ -87,6 +88,10 @@ public class ClientController implements Initializable {
                                 nameClient = authenticationResponse.getUserName();
                                 buttonEnter.setDisable(false);
                             break;
+                        case REGISTRATION_RESPONSE:
+                            RegistrationResponse registrationResponse = (RegistrationResponse) command;
+                            Platform.runLater(()->statusRegistr.setText(registrationResponse.getMsg()));
+
                     }
                 }
             }catch (Exception e){
@@ -111,12 +116,13 @@ public class ClientController implements Initializable {
     }
 
     public void refreshServer(ActionEvent actionEvent) throws IOException {
-        os.writeObject(new ListRequest(1,"John"));
+        os.writeObject(new ListRequest(idClient, nameClient));
         os.flush();
     }
 
     public void refreshClient(ActionEvent actionEvent) {
         File clientDir = new File(clientRoot.toString());
+        curDirOnClient.setText(clientRoot.toString());
         listFileClient.getItems().clear();
         listFileClient.getItems().addAll(clientDir.list());
     }
@@ -142,7 +148,6 @@ public class ClientController implements Initializable {
         Object obj = new RenameRequest(Paths.get(serverRoot, filename),renameName);
         os.writeObject(obj);
         os.flush();
-
     }
 
     public void renameFileOnClient(ActionEvent actionEvent) throws IOException {
@@ -166,7 +171,7 @@ public class ClientController implements Initializable {
 
     public void createNewDirOnClient(ActionEvent actionEvent) throws IOException {
         String dirname = newFilenameClient.getText();
-        Path newDirClient = Files.createDirectories(Paths.get(clientRoot.toString(), dirname));
+        Files.createDirectories(Paths.get(clientRoot.toString(), dirname));
     }
 
     public void goOnDirServer(MouseEvent mouseEvent) throws IOException {
@@ -191,6 +196,7 @@ public class ClientController implements Initializable {
                 listFileClient.getItems().addAll(clientDir.list());
             }
         }
+        curDirOnClient.setText(clientRoot.toString());
     }
 
     public void upToClientDir(ActionEvent actionEvent) {
@@ -198,6 +204,7 @@ public class ClientController implements Initializable {
         File clientDir = new File(clientRoot.toString());
         listFileClient.getItems().clear();
         listFileClient.getItems().addAll(clientDir.list());
+        curDirOnClient.setText(clientRoot.toString());
     }
 
     public void setHelpMessageNewFolder(MouseEvent mouseEvent) {
@@ -285,7 +292,10 @@ public class ClientController implements Initializable {
     public void enterOnProgram(ActionEvent actionEvent) throws IOException {
         node = (Node) actionEvent.getSource();
         Stage stage = (Stage) node.getScene().getWindow();
-        Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("cloud_storage1.fxml"));
+        fxmlLoader.setController(this);
+        Parent parent = fxmlLoader.load();
+       // Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage1.fxml"));
         stage.setScene(new Scene(parent));
         stage.show();
     }
@@ -295,5 +305,30 @@ public class ClientController implements Initializable {
         String password = passwordClient.getText();
         os.writeObject(new AuthenticationRequest(login,password));
         os.flush();
+    }
+
+    public void sendDataNewClientOnServer(ActionEvent actionEvent) throws IOException {
+        String name = nameNewClient.getText();
+        String login = loginNewClient.getText();
+        String password = passwordNewClient.getText();
+        String repeatPassword1 = repeatPassword.getText();
+        if (name.equals("") || login.equals("") || password.equals("")){
+            statusRegistr.setText("Name, login and password can not be null");
+        }
+        else if (password.equals(repeatPassword1)){
+            os.writeObject(new Registration_Req(name,login,password));
+            os.flush();
+        }
+        else
+            statusRegistr.setText("Password and repeated password not match");
+
+    }
+
+    public void goOnStartScreen(ActionEvent actionEvent) throws IOException {
+        node = (Node) actionEvent.getSource();
+        Stage stage = (Stage) node.getScene().getWindow();
+        Parent parent = FXMLLoader.load(getClass().getResource("cloud_storage_StartWindow.fxml"));
+        stage.setScene(new Scene(parent));
+        stage.show();
     }
 }

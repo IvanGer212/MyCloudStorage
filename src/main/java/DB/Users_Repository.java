@@ -48,7 +48,7 @@ public class Users_Repository {
                         resultSet.getString("parent_folder")
 
                 ));
-            }else return null; //Optional.empty();
+            }else return Optional.empty();
 
         } catch (SQLException throwables) {
             throwables.printStackTrace();
@@ -59,7 +59,7 @@ public class Users_Repository {
                 throwables.printStackTrace();
             }
         }
-        return null; //Optional.empty();
+        return Optional.empty();
     }
 
     public boolean createNewUserParentDir (int clientId, String clientName){
@@ -74,6 +74,49 @@ public class Users_Repository {
             throwables.printStackTrace();
         }
         finally {
+            try {
+                connection.close();
+            } catch (SQLException throwables) {
+                throwables.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public boolean createNewClientInBase (String name, String login, String password, String parentDir){
+        Connection connection = DB_connection.getConnection();
+        try{
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT cloud_users (Name, Login, Password, parent_folder) VALUES (?, ?, ?, ?);");
+            preparedStatement.setString(1,name);
+            preparedStatement.setString(2,login);
+            preparedStatement.setString(3,password);
+            preparedStatement.setString(4,parentDir);
+            int i = preparedStatement.executeUpdate();
+            return i==1;
+        } catch (SQLException throwables){
+            throwables.printStackTrace();
+        }
+        finally {
+            try {
+                connection.close();
+            } catch (SQLException throwables){
+                throwables.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public boolean checkUserOnServer (String login) {
+        Connection connection = DB_connection.getConnection();
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("SELECT * FROM cloud_users WHERE  Login = ?;");
+            preparedStatement.setString(1, login);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            return resultSet.next();
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        } finally {
             try {
                 connection.close();
             } catch (SQLException throwables) {
